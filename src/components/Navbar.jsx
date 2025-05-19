@@ -1,6 +1,20 @@
-import React from 'react'
+import React, { useState } from 'react'
 
-const Navbar = () => {
+const Navbar = ({ onSearch }) => {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [mobileSearchVisible, setMobileSearchVisible] = useState(false);
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (onSearch && searchQuery.trim()) {
+            onSearch(searchQuery);
+        }
+    }
+
+    const toggleMobileSearch = () => {
+        setMobileSearchVisible(!mobileSearchVisible);
+    }
+
     return (
         <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-black/80 border-b border-gray-800">
             <div className="container mx-auto px-6 flex h-16 items-center justify-between">
@@ -20,23 +34,30 @@ const Navbar = () => {
                     <a href="#" className="text-gray-300 hover:text-white text-sm font-medium transition-colors">Genres</a>
                 </nav>
 
-                {/* Search Bar */}
+                {/* Desktop Search Bar */}
                 <div className="relative w-full max-w-xs hidden md:block">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                    </div>
-                    <input
-                        type="search"
-                        placeholder="Search manhwa..."
-                        className="w-full py-2 pl-10 pr-4 rounded-full bg-gray-800/60 border border-gray-700/50 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500"
-                    />
+                    <form onSubmit={handleSearch}>
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <input
+                            type="search"
+                            placeholder="Search manhwa..."
+                            className="w-full py-2 pl-10 pr-4 rounded-full bg-gray-800/60 border border-gray-700/50 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </form>
                 </div>
 
                 {/* User Actions */}
                 <div className="flex items-center space-x-2">
-                    <button className="p-2 text-gray-400 hover:text-white md:hidden">
+                    <button 
+                        className="p-2 text-gray-400 hover:text-white md:hidden" 
+                        onClick={toggleMobileSearch}
+                    >
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
@@ -56,6 +77,35 @@ const Navbar = () => {
                     </button>
                 </div>
             </div>
+            
+            {/* Mobile Search Bar - appears when toggled */}
+            {mobileSearchVisible && (
+                <div className="md:hidden px-4 py-3 border-t border-gray-800 bg-black/90">
+                    <form onSubmit={handleSearch} className="flex">
+                        <div className="relative flex-grow">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                            <input
+                                type="search"
+                                placeholder="Search manhwa..."
+                                className="w-full py-2 pl-10 pr-4 rounded-l-full bg-gray-800/60 border border-gray-700/50 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                autoFocus
+                            />
+                        </div>
+                        <button 
+                            type="submit" 
+                            className="px-4 py-2 bg-blue-600 rounded-r-full text-white text-sm font-medium hover:bg-blue-500 transition-colors"
+                        >
+                            Search
+                        </button>
+                    </form>
+                </div>
+            )}
         </header>
     )
 }

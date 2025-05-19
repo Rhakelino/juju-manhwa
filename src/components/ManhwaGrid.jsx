@@ -1,114 +1,65 @@
-// ManhwaGrid.jsx dengan support load more eksternal
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ManhwaCard from './ManhwaCard';
 import ManhwaModal from './ManhwaModal';
 
-function ManhwaGrid({ 
-  manhwaList, 
-  showLoadMore = false, 
-  onLoadMore = null,  // Callback dari parent
-  hasMore = null,     // Kontrol dari parent (optional)
-  isLoading = false   // Loading state dari parent (optional)
-}) {
+function ManhwaGrid({ manhwaList, showLoadMore = false, onLoadMore, hasMore = false, isLoading = false }) {
   const [selectedManhwa, setSelectedManhwa] = useState(null);
-  const [visibleItems, setVisibleItems] = useState(10);
-  const [internalHasMore, setInternalHasMore] = useState(true);
-  
-  // Reset state saat list berubah
-  useEffect(() => {
-    if (!onLoadMore) { // Hanya gunakan internal pagination jika tidak ada external callback
-      setVisibleItems(10);
-      setInternalHasMore(manhwaList.length > 10);
-    }
-  }, [manhwaList, onLoadMore]);
-  
-  // Buka modal
-  const openModal = (manhwa) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleCardClick = (manhwa) => {
     setSelectedManhwa(manhwa);
+    setIsModalOpen(true);
   };
-  
-  // Tutup modal
+
   const closeModal = () => {
-    setSelectedManhwa(null);
+    setIsModalOpen(false);
   };
-  
-  // Handler load more internal
-  const handleInternalLoadMore = () => {
-    const newVisibleItems = visibleItems + 10;
-    setVisibleItems(newVisibleItems);
-    
-    if (newVisibleItems >= manhwaList.length) {
-      setInternalHasMore(false);
-    }
-  };
-  
-  // Tentukan apakah masih ada data (internal atau external control)
-  const shouldShowLoadMore = showLoadMore && 
-    (onLoadMore ? (hasMore !== null ? hasMore : true) : internalHasMore);
-  
-  // Gunakan data sesuai mode pagination (internal atau external)
-  const displayedManhwaList = onLoadMore ? manhwaList : manhwaList.slice(0, visibleItems);
 
   return (
-    <>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {displayedManhwaList.map((item) => (
+    <div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {manhwaList.map((item, index) => (
           <ManhwaCard
-            key={item.id}
+            key={`${item.id}-${index}`}
             title={item.title}
             cover={item.coverImage}
             rating={item.rating}
             chapters={item.chapters}
             genres={item.genres}
-            onClick={() => openModal(item)}
+            onClick={() => handleCardClick(item)}
           />
         ))}
       </div>
       
-      {/* Load More Button */}
-      {shouldShowLoadMore && (
+      {/* Modal Component */}
+      <ManhwaModal 
+        isOpen={isModalOpen} 
+        onClose={closeModal} 
+        manhwa={selectedManhwa} 
+      />
+      
+      {showLoadMore && hasMore && (
         <div className="flex justify-center mt-8">
-          <button 
-            className={`px-6 py-2.5 bg-gray-800 border border-gray-700 text-gray-300 rounded-full hover:bg-gray-700 transition-all flex items-center gap-2 ${
-              isLoading ? 'opacity-70 cursor-not-allowed' : ''
-            }`}
-            onClick={onLoadMore || handleInternalLoadMore}
+          <button
+            onClick={onLoadMore}
             disabled={isLoading}
+            className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
-                <span>Loading...</span>
-              </>
+              <span className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Loading...
+              </span>
             ) : (
-              <>
-                <span>Load More</span>
-                {!onLoadMore && (
-                  <span className="text-xs text-gray-400">
-                    {visibleItems}/{manhwaList.length}
-                  </span>
-                )}
-              </>
+              "Load More"
             )}
           </button>
         </div>
       )}
-      
-      {/* End of list message */}
-      {showLoadMore && !shouldShowLoadMore && manhwaList.length > 0 && (
-        <div className="text-center mt-8 text-gray-500 text-sm">
-          You've reached the end of the list
-        </div>
-      )}
-      
-      {/* Modal */}
-      {selectedManhwa && (
-        <ManhwaModal 
-          manhwa={selectedManhwa} 
-          onClose={closeModal}
-        />
-      )}
-    </>
+    </div>
   );
 }
 

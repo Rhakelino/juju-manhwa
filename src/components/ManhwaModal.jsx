@@ -1,180 +1,130 @@
-import { useEffect, useRef } from 'react';
+import React from 'react';
 
-function ManhwaModal({ manhwa, onClose }) {
-  const modalRef = useRef(null);
-
-  // Same event handlers for closing...
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
-        onClose();
-      }
-    }
-    document.body.style.overflow = 'hidden';
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.body.style.overflow = '';
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [onClose]);
-
-  useEffect(() => {
-    function handleEscKey(event) {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    }
-    window.addEventListener('keydown', handleEscKey);
-    return () => {
-      window.removeEventListener('keydown', handleEscKey);
-    };
-  }, [onClose]);
-
-  // CSS for hiding scrollbar
-  const hideScrollbarStyle = `
-    .hide-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .hide-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-  `;
-
-  if (!manhwa) return null;
+const ManhwaModal = ({ isOpen, onClose, manhwa }) => {
+  if (!isOpen || !manhwa) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 backdrop-blur-sm">
-      <style>{hideScrollbarStyle}</style>
-      <div 
-        ref={modalRef}
-        className="bg-gradient-to-b from-gray-900 to-gray-950 rounded-xl border border-gray-700/50 w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row shadow-2xl"
-      >
-        {/* Image Section with gradient overlay */}
-        <div className="md:w-2/5 relative group">
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10"></div>
-          <img
-            src={manhwa.coverImage}
-            alt={manhwa.title}
-            className="w-full h-80 md:h-full object-cover transition-transform duration-300 md:group-hover:scale-95 md:group-hover:rounded-sm"
-            onError={(e) => {
-              e.target.src = 'https://via.placeholder.com/300x450?text=No+Image';
-            }}
-          />
-          <div className="absolute top-4 right-4 md:hidden z-20">
-            <button 
-              onClick={onClose}
-              className="bg-black/60 backdrop-blur-sm rounded-full p-2 text-white hover:bg-black/80"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
-          </div>
-          
-          {/* Rating badge floating on image */}
-          <div className="absolute bottom-4 left-4 bg-black/70 backdrop-blur-sm rounded-lg px-3 py-1.5 flex items-center z-20">
-            <svg className="w-4 h-4 text-yellow-400 mr-1.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-            </svg>
-            <span className="text-white font-semibold">{manhwa.rating}</span>
-          </div>
-        </div>
-        
-        {/* Content Section - Hidden scrollbar but still scrollable */}
-        <div className="flex-1 p-8 overflow-y-auto hide-scrollbar">
-          <div className="flex justify-between items-start">
-            <div className="space-y-4">
-              <h2 className="text-3xl font-bold text-white">{manhwa.title}</h2>
-              
-              {/* Author with icon */}
-              {manhwa.authors && (
-                <div className="flex items-center text-gray-300">
-                  <svg className="w-4 h-4 mr-2 opacity-70" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path>
+    <div className="fixed inset-0 z-50 overflow-hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        {/* Background overlay */}
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 transition-opacity"
+          aria-hidden="true"
+          onClick={onClose}
+        ></div>
+
+        {/* Modal panel */}
+        <div className="inline-block align-bottom bg-gradient-to-b from-gray-900 to-black rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full max-h-[90vh] w-full mx-4">
+          <div className="flex flex-col md:flex-row max-h-[90vh] overflow-y-auto">
+            {/* Image section - improved for mobile */}
+            <div className="md:w-1/3 flex-shrink-0 h-[200px] md:h-auto">
+              <img
+                src={manhwa.coverImage}
+                alt={manhwa.title}
+                className="w-full h-full object-cover md:h-[500px] md:max-h-[90vh]"
+              />
+            </div>
+
+            {/* Content section */}
+            <div className="md:w-2/3 p-4 md:p-6 flex flex-col overflow-hidden">
+              <div className="flex justify-between items-start">
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-2 pr-8">{manhwa.title}</h3>
+                <button
+                  onClick={onClose}
+                  className="text-gray-400 hover:text-white absolute top-4 right-4"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
                   </svg>
-                  <p className="text-sm">
-                    {manhwa.authors}
-                  </p>
+                </button>
+              </div>
+
+              {/* Rating and status - more responsive */}
+              <div className="flex flex-wrap items-center mb-3 gap-2">
+                <div className="flex items-center mr-2">
+                  <svg className="w-5 h-5 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                  </svg>
+                  <span className="text-white font-medium">{manhwa.rating}</span>
+                </div>
+                <div className="px-2 py-1 bg-blue-900/40 border border-blue-800 rounded-full text-xs text-blue-300 font-medium">
+                  {manhwa.status || 'Unknown'}
+                </div>
+                <div className="text-gray-400 text-sm">
+                  {manhwa.chapters} chapters
+                </div>
+              </div>
+
+              {/* Authors */}
+              {manhwa.authors && (
+                <div className="mb-2">
+                  <span className="text-gray-400 text-sm">Authors: </span>
+                  <span className="text-white text-sm">{manhwa.authors}</span>
                 </div>
               )}
-              
-              {/* Genre badges with improved design */}
-              <div className="flex flex-wrap gap-2 pt-1">
-                {manhwa.genres && manhwa.genres.map((genre, index) => (
-                  <span 
-                    key={index} 
-                    className="bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs font-medium px-3 py-1 rounded-md"
-                  >
-                    {genre}
-                  </span>
-                ))}
+
+              {/* Genres - improved for mobile */}
+              {manhwa.genres && manhwa.genres.length > 0 && (
+                <div className="mb-3">
+                  <div className="flex flex-wrap gap-1">
+                    {manhwa.genres.map((genre, index) => (
+                      <span key={index} className="px-2 py-0.5 bg-gray-800 rounded-full text-xs text-gray-300 mb-1">
+                        {genre}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Description - responsive height */}
+              <div className="mt-2 flex-grow overflow-hidden border-l-4 border-blue-500 border-opacity-70 bg-gray-800 p-2 md:p-3 rounded-lg">
+                <h4 className="text-white font-medium mb-1 md:mb-2">Synopsis</h4>
+                <div className="overflow-y-auto max-h-[120px] md:max-h-[200px] pr-2 scrollbar-hide">
+                  <p className="text-gray-300 text-xs md:text-sm">
+                    {manhwa.description || "No description available."}
+                  </p>
+                </div>
+              </div>
+
+              {/* Button row - full width on mobile */}
+              <div className="mt-4 md:mt-6 grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4">
+                <button className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-full font-medium transition-all shadow-lg shadow-blue-900/20 text-sm md:text-base">
+                  Read Now
+                </button>
+                <button className="px-4 py-2 border border-blue-600 text-blue-400 hover:text-blue-300 hover:border-blue-500 rounded-full font-medium transition-all flex items-center justify-center text-sm md:text-base">
+                  <svg className="w-4 h-4 md:w-5 md:h-5 mr-1 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                  </svg>
+                  Add to Library
+                </button>
               </div>
             </div>
-            
-            {/* Close button - desktop */}
-            <div className="hidden md:block">
-              <button 
-                onClick={onClose}
-                className="text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700/60 rounded-full p-2 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-              </button>
-            </div>
-          </div>
-          
-          {/* Stats with improved design */}
-          <div className="flex items-center gap-5 mt-6 mb-6 text-sm bg-gray-800/30 rounded-lg p-3 border border-gray-700/40">
-            <div className="text-gray-300 flex items-center">
-              <svg className="w-4 h-4 text-gray-400 mr-1.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
-              </svg>
-              <span>Ch. {manhwa.chapters}</span>
-            </div>
-            <div className="text-gray-300 flex items-center">
-              <svg className="w-4 h-4 text-gray-400 mr-1.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd"></path>
-              </svg>
-              <span className="capitalize">
-                {manhwa.status === "completed" ? "Completed" : "Ongoing"}
-              </span>
-            </div>
-          </div>
-          
-          {/* Description with improved design */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
-              <svg className="w-5 h-5 mr-2 text-blue-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"></path>
-              </svg>
-              Synopsis
-            </h3>
-            <p className="text-gray-300 text-sm leading-relaxed bg-gray-800/20 p-4 rounded-lg border-l-4 border-blue-500/50">
-              {manhwa.description || "No description available."}
-            </p>
-          </div>
-          
-          {/* Action Buttons with improved design */}
-          <div className="flex gap-4 mt-6">
-            <button className="flex-1 px-5 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-lg hover:from-blue-500 hover:to-indigo-600 transition-all shadow-lg shadow-blue-900/30 font-medium flex items-center justify-center">
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-              </svg>
-              Read Now
-            </button>
-            <button className="flex-1 px-5 py-3 bg-gray-800/80 backdrop-blur-sm text-white rounded-lg hover:bg-gray-700/80 transition-all border border-gray-700/50 font-medium flex items-center justify-center">
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-              </svg>
-              Add to Library
-            </button>
           </div>
         </div>
       </div>
     </div>
   );
+};
+
+// Add this CSS at the top of your component file or in your global CSS
+const scrollbarHideStyles = `
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+`;
+
+// Add the styles to the document head
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.innerText = scrollbarHideStyles;
+  document.head.appendChild(styleSheet);
 }
 
 export default ManhwaModal;
